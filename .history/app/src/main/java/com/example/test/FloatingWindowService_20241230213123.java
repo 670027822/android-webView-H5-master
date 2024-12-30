@@ -9,7 +9,6 @@ import android.content.IntentFilter;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.PowerManager;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
@@ -23,7 +22,6 @@ public class FloatingWindowService extends Service {
     private View floatingView;
     private WindowManager.LayoutParams params;
     private WebView webView;
-    private PowerManager.WakeLock wakeLock;
     
     private BroadcastReceiver screenReceiver = new BroadcastReceiver() {
         @Override
@@ -56,11 +54,6 @@ public class FloatingWindowService extends Service {
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
         registerReceiver(screenReceiver, filter);
-        
-        // 获取电源锁
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyApp:WebViewWakeLock");
-        wakeLock.acquire();
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -123,8 +116,5 @@ public class FloatingWindowService extends Service {
             windowManager.removeView(floatingView);
         }
         unregisterReceiver(screenReceiver);
-        if (wakeLock != null && wakeLock.isHeld()) {
-            wakeLock.release();
-        }
     }
 } 

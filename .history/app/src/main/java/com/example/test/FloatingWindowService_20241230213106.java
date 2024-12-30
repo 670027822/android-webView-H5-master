@@ -9,21 +9,15 @@ import android.content.IntentFilter;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.PowerManager;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 
 public class FloatingWindowService extends Service {
     private WindowManager windowManager;
     private View floatingView;
     private WindowManager.LayoutParams params;
-    private WebView webView;
-    private PowerManager.WakeLock wakeLock;
     
     private BroadcastReceiver screenReceiver = new BroadcastReceiver() {
         @Override
@@ -44,63 +38,38 @@ public class FloatingWindowService extends Service {
         }
     };
 
-    @SuppressLint("SetJavaScriptEnabled")
     @Override
     public void onCreate() {
         super.onCreate();
         createFloatingWindow();
-        setupWebView();
         
         // 注册屏幕监听
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
         registerReceiver(screenReceiver, filter);
-        
-        // 获取电源锁
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyApp:WebViewWakeLock");
-        wakeLock.acquire();
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
-    private void setupWebView() {
-        webView = new WebView(this);
-        webView.setWebViewClient(new WebViewClient());
-        
-        // 配置 WebView 设置
-        WebSettings settings = webView.getSettings();
-        settings.setJavaScriptEnabled(true);
-        settings.setDomStorageEnabled(true);
-        settings.setDatabaseEnabled(true);
-        settings.setMediaPlaybackRequiresUserGesture(false);
-        
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-        }
-        
-        // 加载网页
-        webView.loadUrl("https://tv.aizhijia.top/naozhong.html");
-        
-        // 添加到悬浮窗
-        ((LinearLayout) floatingView).addView(webView, 1, 1);
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 
     private void createFloatingWindow() {
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         floatingView = new LinearLayout(this);
+        // 设置完全透明的背景
         floatingView.setBackgroundColor(0x00000000);
 
         params = new WindowManager.LayoutParams(
-                1, // 设置最小尺寸
-                1,
+                10, // 宽度设为10像素
+                10, // 高度设为10像素
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ?
                         WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY :
                         WindowManager.LayoutParams.TYPE_PHONE,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
                         WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE |
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
-                        WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, // 保持屏幕常亮
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                 PixelFormat.TRANSLUCENT
         );
 
@@ -116,15 +85,9 @@ public class FloatingWindowService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (webView != null) {
-            webView.destroy();
-        }
         if (windowManager != null && floatingView != null) {
             windowManager.removeView(floatingView);
         }
         unregisterReceiver(screenReceiver);
-        if (wakeLock != null && wakeLock.isHeld()) {
-            wakeLock.release();
-        }
     }
 } 
