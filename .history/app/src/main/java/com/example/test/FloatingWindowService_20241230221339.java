@@ -65,104 +65,6 @@ public class FloatingWindowService extends Service {
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "onCreate: 服务创建");
-        
-        // 1. 提高进程优先级
-        setForegroundPriority();
-        
-        createFloatingWindow();
-        setupWebView();
-        startKeepAliveTimer();
-        setupAlarm();
-        
-        // 注册屏幕监听
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_SCREEN_OFF);
-        filter.addAction(Intent.ACTION_SCREEN_ON);
-        filter.addAction(Intent.ACTION_USER_PRESENT);
-        filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-        registerReceiver(screenReceiver, filter);
-        
-        // 获取电源锁
-        acquireWakeLocks();
-        
-        createNotificationChannel();
-        startForeground(NOTIFICATION_ID, createNotification());
-    }
-
-    private void setForegroundPriority() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            // 设置前台服务类型
-            startForeground(NOTIFICATION_ID, createNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST);
-        } else {
-            startForeground(NOTIFICATION_ID, createNotification());
-        }
-    }
-
-    private void acquireWakeLocks() {
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        // CPU 唤醒锁
-        wakeLock = powerManager.newWakeLock(
-            PowerManager.PARTIAL_WAKE_LOCK | 
-            PowerManager.ON_AFTER_RELEASE | 
-            PowerManager.ACQUIRE_CAUSES_WAKEUP,
-            "MyApp:WebViewWakeLock"
-        );
-        wakeLock.acquire();
-    }
-
-    private void startKeepAliveTimer() {
-        keepAliveTimer = new Timer();
-        keepAliveTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                if (webView != null) {
-                    webView.post(() -> {
-                        webView.evaluateJavascript(
-                            "(function() {" +
-                            "   if(typeof keepAlive === 'function') {" +
-                            "       keepAlive();" +
-                            "   }" +
-                            "   console.log('Service KeepAlive: ' + new Date().toISOString());" +
-                            "})();", null
-                        );
-                    });
-                }
-                // 重新启动服务
-                startService(new Intent(FloatingWindowService.this, FloatingWindowService.class));
-            }
-        }, 0, 30000); // 每30秒执行一次
-    }
-
-    private void setupAlarm() {
-        alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(this, FloatingWindowService.class);
-        alarmPendingIntent = PendingIntent.getService(
-            this, 
-            0, 
-            intent, 
-            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-        );
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                System.currentTimeMillis() + 60000, // 1分钟后
-                alarmPendingIntent
-            );
-        } else {
-            alarmManager.setExact(
-                AlarmManager.RTC_WAKEUP,
-                System.currentTimeMillis() + 60000,
-                alarmPendingIntent
-            );
-        }
-    }
-
-    @SuppressLint("SetJavaScriptEnabled")
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.d(TAG, "onCreate: 服务创建");
         createFloatingWindow();
         setupWebView();
         
@@ -170,8 +72,6 @@ public class FloatingWindowService extends Service {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
-        filter.addAction(Intent.ACTION_USER_PRESENT);
-        filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         registerReceiver(screenReceiver, filter);
         
         // 获取电源锁
@@ -280,19 +180,12 @@ public class FloatingWindowService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand: 服务启动");
-        
-        // 如果服务被系统杀死后重启
-        if (intent == null) {
-            setupAlarm();
-            return START_STICKY;
-        }
-
+        // 获取传递过来的URL
         String url = intent.getStringExtra("current_url");
         if (url != null && webView != null) {
             Log.d(TAG, "加载URL: " + url);
             webView.loadUrl(url);
         }
-        
         return START_STICKY;
     }
 
