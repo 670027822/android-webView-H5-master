@@ -38,18 +38,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
         
-        // 请求忽略电池优化
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
-            if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
-                val intent = Intent().apply {
-                    action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-                    data = Uri.parse("package:$packageName")
-                }
-                startActivity(intent)
-            }
-        }
-        
         if (permissions.isNotEmpty()) {
             ActivityCompat.requestPermissions(
                 this,

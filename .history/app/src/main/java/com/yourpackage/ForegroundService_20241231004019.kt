@@ -4,8 +4,6 @@ import android.content.PendingIntent
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
-import android.content.Context
-import android.app.AlarmManager
 
 class ForegroundService : Service() {
     private val CHANNEL_ID = "ForegroundServiceChannel"
@@ -20,7 +18,6 @@ class ForegroundService : Service() {
         val notification = createNotification()
         try {
             startForeground(NOTIFICATION_ID, notification)
-            startServiceAutoRestart()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -66,23 +63,5 @@ class ForegroundService : Service() {
             .setContentIntent(pendingIntent)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .build()
-    }
-
-    private fun startServiceAutoRestart() {
-        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(this, ForegroundService::class.java)
-        val pendingIntent = PendingIntent.getService(
-            this,
-            1,
-            intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-        
-        alarmManager.setRepeating(
-            AlarmManager.RTC_WAKEUP,
-            System.currentTimeMillis() + 15 * 60 * 1000,
-            15 * 60 * 1000,
-            pendingIntent
-        )
     }
 } 
