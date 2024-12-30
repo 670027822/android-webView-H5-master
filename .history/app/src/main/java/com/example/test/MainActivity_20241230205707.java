@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // 这里填你需要打包的 H5 页面链接
-        webView.loadUrl("https://tv.aizhijia.top/naozhong.html");
+        webView.loadUrl("https://baidu.com");
 
         //显示一些小图片（头像）
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -323,22 +323,6 @@ public class MainActivity extends AppCompatActivity {
     private void startFloatingWindowService() {
         Intent intent = new Intent(this, FloatingWindowService.class);
         startService(intent);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // 应用进入前台，停止悬浮窗服务
-        stopService(new Intent(this, FloatingWindowService.class));
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        // 应用进入后台，启动悬浮窗服务
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Settings.canDrawOverlays(this)) {
-            startFloatingWindowService();
-        }
     }
 
 }
