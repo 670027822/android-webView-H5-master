@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     ValueCallback<Uri> mFilePathCallback;
     ValueCallback<Uri[]> mFilePathCallbackArray;
     private static final int JOB_ID = 100;
+    private static final int OVERLAY_PERMISSION_REQUEST_CODE = 124;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
