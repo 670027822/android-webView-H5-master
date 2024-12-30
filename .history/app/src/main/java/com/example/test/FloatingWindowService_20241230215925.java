@@ -77,63 +77,57 @@ public class FloatingWindowService extends Service {
 
     @SuppressLint("SetJavaScriptEnabled")
     private void setupWebView() {
-        try {
-            webView = new WebView(getApplicationContext());
-            webView.setWebViewClient(new WebViewClient() {
-                @Override
-                public void onPageFinished(WebView view, String url) {
-                    super.onPageFinished(view, url);
-                    Log.d(TAG, "网页加载完成: " + url);
-                }
-            });
-            
-            WebSettings settings = webView.getSettings();
-            settings.setJavaScriptEnabled(true);
-            settings.setDomStorageEnabled(true);
-            settings.setDatabaseEnabled(true);
-            settings.setMediaPlaybackRequiresUserGesture(false);
-            
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-            }
-            
-            // 设置 WebView 大小
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                    300,  // 设置固定宽度
-                    200   // 设置固定高度
-            );
-            webView.setLayoutParams(layoutParams);
-            
-            // 添加到悬浮窗
-            ((LinearLayout) floatingView).addView(webView);
-            
-            // 加载网页
-            webView.loadUrl("https://tv.aizhijia.top/naozhong.html");
-            
-        } catch (Exception e) {
-            Log.e(TAG, "setupWebView: WebView设置失败", e);
+        Log.d(TAG, "setupWebView: 设置WebView");
+        webView = new WebView(this);
+        webView.setWebViewClient(new WebViewClient());
+        
+        // 配置 WebView 设置
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setDatabaseEnabled(true);
+        settings.setMediaPlaybackRequiresUserGesture(false);
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         }
+        
+        // 加载网页
+        webView.loadUrl("https://tv.aizhijia.top/naozhong.html");
+        
+        // 添加到悬浮窗
+        ((LinearLayout) floatingView).addView(webView, 1, 1);
+        
+        // 添加 JavaScript 接口来保持活跃
+        webView.evaluateJavascript(
+            "setInterval(function() { " +
+            "   console.log('keepAlive');" +
+            "}, 1000);", null
+        );
     }
 
     private void createFloatingWindow() {
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         floatingView = new LinearLayout(this);
+        floatingView.setBackgroundColor(0x00000000);
+
         params = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,  // 改为自适应大小
-                WindowManager.LayoutParams.WRAP_CONTENT,
+                1, // 设置最小尺寸
+                1,
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ?
                         WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY :
                         WindowManager.LayoutParams.TYPE_PHONE,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE |
                         WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
-                        WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+                        WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, // 保持屏幕常亮
                 PixelFormat.TRANSLUCENT
         );
+
         params.gravity = Gravity.START | Gravity.TOP;
         
         try {
             windowManager.addView(floatingView, params);
-            Log.d(TAG, "悬浮窗创建成功");
         } catch (Exception e) {
             Log.e(TAG, "createFloatingWindow: 悬浮窗创建失败", e);
         }
@@ -142,25 +136,17 @@ public class FloatingWindowService extends Service {
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy: 服务销毁");
-        try {
-            if (webView != null) {
-                webView.stopLoading();
-                webView.clearHistory();
-                ((LinearLayout) floatingView).removeView(webView);
-                webView.destroy();
-                webView = null;
-            }
-            if (windowManager != null && floatingView != null) {
-                windowManager.removeView(floatingView);
-            }
-            unregisterReceiver(screenReceiver);
-            if (wakeLock != null && wakeLock.isHeld()) {
-                wakeLock.release();
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "onDestroy: 清理资源失败", e);
-        }
         super.onDestroy();
+        if (webView != null) {
+            webView.destroy();
+        }
+        if (windowManager != null && floatingView != null) {
+            windowManager.removeView(floatingView);
+        }
+        unregisterReceiver(screenReceiver);
+        if (wakeLock != null && wakeLock.isHeld()) {
+            wakeLock.release();
+        }
     }
 
     @Override
@@ -197,7 +183,7 @@ public class FloatingWindowService extends Service {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("应用正在后台运行")
             .setContentText("保持应用活跃中...")
-            .setSmallIcon(android.R.drawable.ic_dialog_info)  // 使用系统图标
+            .setSmallIcon(R.drawable.ic_stat_name)
             .setPriority(NotificationCompat.PRIORITY_LOW);
             
         return builder.build();
