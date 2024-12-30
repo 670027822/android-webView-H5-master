@@ -8,17 +8,12 @@ import android.content.Context
 import android.app.AlarmManager
 import android.os.Handler
 import android.os.Looper
-import android.media.MediaPlayer
-import android.media.AudioAttributes
-import android.media.AudioManager
 
 class ForegroundService : Service() {
     private val CHANNEL_ID = "ForegroundServiceChannel"
     private val NOTIFICATION_ID = 1
     private var notificationCount = 0
     private val handler = Handler(Looper.getMainLooper())
-    private var mediaPlayer: MediaPlayer? = null
-    
     private val updateRunnable = object : Runnable {
         override fun run() {
             addNewNotification()
@@ -29,7 +24,6 @@ class ForegroundService : Service() {
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
-        initSilentMusic()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -37,8 +31,8 @@ class ForegroundService : Service() {
         try {
             startForeground(NOTIFICATION_ID, notification)
             startServiceAutoRestart()
+            // 开始定期添加通知
             handler.post(updateRunnable)
-            startSilentMusic()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -48,48 +42,6 @@ class ForegroundService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacks(updateRunnable)
-        stopSilentMusic()
-    }
-
-    private fun initSilentMusic() {
-        try {
-            mediaPlayer = MediaPlayer().apply {
-                setAudioAttributes(
-                    AudioAttributes.Builder()
-                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                        .setUsage(AudioAttributes.USAGE_MEDIA)
-                        .build()
-                )
-                setDataSource("android.resource://${packageName}/raw/silence")
-                setVolume(0f, 0f) // 设置音量为0
-                isLooping = true // 循环播放
-                prepare()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    private fun startSilentMusic() {
-        try {
-            mediaPlayer?.start()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    private fun stopSilentMusic() {
-        try {
-            mediaPlayer?.apply {
-                if (isPlaying) {
-                    stop()
-                }
-                release()
-            }
-            mediaPlayer = null
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
     }
 
     override fun onBind(intent: Intent?): IBinder? {
