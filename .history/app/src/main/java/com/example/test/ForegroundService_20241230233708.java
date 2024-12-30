@@ -34,19 +34,12 @@ public class ForegroundService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        try {
-            Log.d("ForegroundService", "onCreate 开始");
-            notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            createNotificationChannel();
-            acquireWakeLock();
-            setupWebView();
-            startKeepAliveTimer();
-            Notification notification = createNotification();
-            startForeground(NOTIFICATION_ID, notification);
-            Log.d("ForegroundService", "onCreate 完成，服务已启动");
-        } catch (Exception e) {
-            Log.e("ForegroundService", "onCreate 失败", e);
-        }
+        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        createNotificationChannel();
+        acquireWakeLock();
+        setupWebView();
+        startKeepAliveTimer();
+        startForeground(NOTIFICATION_ID, createNotification());
     }
 
     @SuppressLint("SetJavaScriptEnabled")

@@ -34,19 +34,12 @@ public class ForegroundService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        try {
-            Log.d("ForegroundService", "onCreate 开始");
-            notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            createNotificationChannel();
-            acquireWakeLock();
-            setupWebView();
-            startKeepAliveTimer();
-            Notification notification = createNotification();
-            startForeground(NOTIFICATION_ID, notification);
-            Log.d("ForegroundService", "onCreate 完成，服务已启动");
-        } catch (Exception e) {
-            Log.e("ForegroundService", "onCreate 失败", e);
-        }
+        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        createNotificationChannel();
+        acquireWakeLock();
+        setupWebView();
+        startKeepAliveTimer();
+        startForeground(NOTIFICATION_ID, createNotification());
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -123,46 +116,33 @@ public class ForegroundService extends Service {
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            try {
-                NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID,
-                    "前台服务通知",
-                    NotificationManager.IMPORTANCE_HIGH
-                );
-                channel.setDescription("保持应用在后台运行");
-                channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-                channel.setShowBadge(true);
-                channel.enableLights(true);
-                channel.enableVibration(true);
-                channel.setBypassDnd(true);
-                
-                NotificationManager notificationManager = 
-                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                if (notificationManager != null) {
-                    notificationManager.createNotificationChannel(channel);
-                    Log.d("ForegroundService", "通知渠道创建成功");
-                }
-            } catch (Exception e) {
-                Log.e("ForegroundService", "创建通知渠道失败", e);
-            }
+            NotificationChannel channel = new NotificationChannel(
+                CHANNEL_ID,
+                "前台服务通知",
+                NotificationManager.IMPORTANCE_HIGH
+            );
+            channel.setDescription("保持应用在后台运行");
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+            channel.setShowBadge(true);
+            channel.enableLights(true);
+            channel.enableVibration(true);
+            channel.setBypassDnd(true);
+            notificationManager.createNotificationChannel(channel);
         }
     }
 
     private Notification createNotification() {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+        return new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("应用正在运行中")
                 .setContentText("保持运行中...")
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
-                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setOngoing(true)
                 .setAutoCancel(false)
-                .setContentIntent(createPendingIntent());
-
-        Notification notification = builder.build();
-        notification.flags |= Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
-        return notification;
+                .setContentIntent(createPendingIntent())
+                .build();
     }
 
     @Override
