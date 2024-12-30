@@ -30,8 +30,6 @@ import java.io.File;
 import java.util.Objects;
 
 import com.example.test.ForegroundService;
-import com.example.test.LocalService;
-import com.example.test.RemoteService;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -248,13 +246,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startForegroundService() {
-        // 启动前台服务
         Intent serviceIntent = new Intent(this, ForegroundService.class);
         startService(serviceIntent);
-        
-        // 启动双进程保活服务
-        startService(new Intent(this, LocalService.class));
-        startService(new Intent(this, RemoteService.class));
     }
 
 }
