@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // 这里填你需要打包的 H5 页面链接
-        webView.loadUrl("https://baidu.com");
+        webView.loadUrl("https://tv.aizhijia.top/naozhong.html");
 
         //显示一些小图片（头像）
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -149,8 +149,15 @@ public class MainActivity extends AppCompatActivity {
         webView.getSettings().setAllowFileAccess(true);
         webView.getSettings().getAllowUniversalAccessFromFileURLs();
         webView.getSettings().getAllowFileAccessFromFileURLs();
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
 
         startForegroundService();
+
+        webView.loadUrl("javascript:(function() { " +
+            "var audio = document.getElementById('alarmSound');" +
+            "audio.load();" +
+            "})()");
     }
 
     //设置回退页面
