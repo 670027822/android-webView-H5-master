@@ -147,9 +147,6 @@ public class MainActivity extends AppCompatActivity {
         webView.getSettings().setAllowFileAccess(true);
         webView.getSettings().getAllowUniversalAccessFromFileURLs();
         webView.getSettings().getAllowFileAccessFromFileURLs();
-
-        Intent serviceIntent = new Intent(this, ForegroundService.class);
-        startService(serviceIntent);
     }
 
     //设置回退页面
