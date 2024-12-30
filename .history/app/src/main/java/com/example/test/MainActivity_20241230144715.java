@@ -150,7 +150,8 @@ public class MainActivity extends AppCompatActivity {
         webView.getSettings().getAllowUniversalAccessFromFileURLs();
         webView.getSettings().getAllowFileAccessFromFileURLs();
 
-        startForegroundService();
+        Intent serviceIntent = new Intent(this, ForegroundService.class);
+        startService(serviceIntent);
     }
 
     //设置回退页面
@@ -236,11 +237,6 @@ public class MainActivity extends AppCompatActivity {
         filePath = cursor.getString(columnIndex);
         cursor.close();
         return filePath;
-    }
-
-    private void startForegroundService() {
-        Intent serviceIntent = new Intent(this, ForegroundService.class);
-        startService(serviceIntent);
     }
 
 }
