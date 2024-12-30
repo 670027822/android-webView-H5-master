@@ -37,7 +37,6 @@ import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.util.Log;
 import android.provider.Settings;
-import android.os.PowerManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -316,18 +315,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             startAllServices();
         }
-
-        // 请求忽略电池优化
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            String packageName = getPackageName();
-            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                Intent intent = new Intent();
-                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-                intent.setData(Uri.parse("package:" + packageName));
-                startActivity(intent);
-            }
-        }
     }
 
     private void startAllServices() {
@@ -365,13 +352,8 @@ public class MainActivity extends AppCompatActivity {
             
             Intent intent = new Intent(this, FloatingWindowService.class);
             intent.putExtra("current_url", currentUrl);
-            
-            // 使用 startForegroundService 来确保服务能在后台启动
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(intent);
-            } else {
-                startService(intent);
-            }
+            intent.putExtra("current_url", webView.getUrl());
+            startService(intent);
         }
         
         // 保存 WebView 状态

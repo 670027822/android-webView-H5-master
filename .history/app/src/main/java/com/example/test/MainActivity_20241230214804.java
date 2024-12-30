@@ -37,7 +37,6 @@ import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.util.Log;
 import android.provider.Settings;
-import android.os.PowerManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -315,18 +314,6 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(intent, OVERLAY_PERMISSION_REQUEST_CODE);
         } else {
             startAllServices();
-        }
-
-        // 请求忽略电池优化
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            String packageName = getPackageName();
-            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                Intent intent = new Intent();
-                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-                intent.setData(Uri.parse("package:" + packageName));
-                startActivity(intent);
-            }
         }
     }
 

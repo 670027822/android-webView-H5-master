@@ -1,9 +1,6 @@
 package com.example.test;
 
 import android.annotation.SuppressLint;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -21,7 +18,6 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
-import androidx.core.app.NotificationCompat;
 
 public class FloatingWindowService extends Service {
     private static final String TAG = "FloatingWindowService";
@@ -30,8 +26,6 @@ public class FloatingWindowService extends Service {
     private WindowManager.LayoutParams params;
     private WebView webView;
     private PowerManager.WakeLock wakeLock;
-    private static final int NOTIFICATION_ID = 1001;
-    private static final String CHANNEL_ID = "floating_window_channel";
     
     private BroadcastReceiver screenReceiver = new BroadcastReceiver() {
         @Override
@@ -70,9 +64,6 @@ public class FloatingWindowService extends Service {
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyApp:WebViewWakeLock");
         wakeLock.acquire();
-        
-        createNotificationChannel();
-        startForeground(NOTIFICATION_ID, createNotification());
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -165,27 +156,5 @@ public class FloatingWindowService extends Service {
             webView.loadUrl(url);
         }
         return START_STICKY;
-    }
-
-    private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                CHANNEL_ID,
-                "悬浮窗服务",
-                NotificationManager.IMPORTANCE_LOW
-            );
-            NotificationManager manager = getSystemService(NotificationManager.class);
-            manager.createNotificationChannel(channel);
-        }
-    }
-    
-    private Notification createNotification() {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("应用正在后台运行")
-            .setContentText("保持应用活跃中...")
-            .setSmallIcon(R.drawable.ic_stat_name)
-            .setPriority(NotificationCompat.PRIORITY_LOW);
-            
-        return builder.build();
     }
 } 
