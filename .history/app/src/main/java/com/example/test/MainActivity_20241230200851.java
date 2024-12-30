@@ -276,10 +276,10 @@ public class MainActivity extends AppCompatActivity {
         builder.setRequiresCharging(true);
         
         // 设置任务的最小延迟时间（15分钟）
-        builder.setMinimumLatency(5 * 60 * 1000);
+        builder.setMinimumLatency(15 * 60 * 1000);
         
         // 设置任务的最大延迟时间（30分钟）
-        builder.setOverrideDeadline(15 * 60 * 1000);
+        builder.setOverrideDeadline(30 * 60 * 1000);
         
         // 设置在设备重启后是否继续执行
         builder.setPersisted(true);
