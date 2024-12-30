@@ -17,7 +17,7 @@ class MyAccessibilityService : AccessibilityService() {
                 Log.d("AccessibilityService", "保持服务活跃: ${System.currentTimeMillis()}")
                 
                 // 每30秒执行一次
-                handler.postDelayed(this, 3_000)
+                handler.postDelayed(this, 30_000)
             } catch (e: Exception) {
                 Log.e("AccessibilityService", "保活任务执行失败", e)
             }
