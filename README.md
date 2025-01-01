@@ -1,6 +1,6 @@
 # android-webView-H5
 
-## 在原开源项目(android-webView-H5 )的基础上进行完善，修改如下：
+-- 在原开源项目(android-webView-H5 )的基础上进行完善，修改如下：
 
 ## 1、增加了 action，无需自己编译就可以 folk 以后利用 github 给你打包，方便没有条件编译的人使用
 
@@ -10,7 +10,7 @@
 
 ## 1、收藏项目，folk 到自己仓库
 
-## 2、把 `app/java/com.example.test/MainActivity.java` 里面第 139 行的 `url` 改成你要打包的网页地址
+## 2、把 `app/java/com.example.test/MainActivity.java` 里面第 146 行的 `url` 改成你要打包的网页地址
 
 ## 3、在 app/res/values/strings.xml 中修改应用名称
 
@@ -28,7 +28,7 @@
 
 ## 1. Star the project and fork it to your own repository.
 
-## 2. Change the url at line 139 in app/java/com.example.test/MainActivity.java to the web address you want to package.
+## 2. Change the url at line 146 in app/java/com.example.test/MainActivity.java to the web address you want to package.
 
 ## 3. Modify the app name in app/res/values/strings.xml.
 
