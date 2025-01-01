@@ -1,8 +1,8 @@
 # android-webView-H5
 
----- 在原开源项目(android-webView-H5 )的基础上进行完善，修改如下：
+在原开源项目(android-webView-H5 )的基础上进行完善，修改如下：
 
-## 1、增加了 action，无需自己编译就可以 folk 以后利用 github 给你打包，方便没有条件编译的人使用
+1、增加了 action，无需自己编译就可以 folk 以后利用 github 给你打包，方便没有条件编译的人使用
 
 ## 2、增加了常驻通知栏的功能，让应用永久在后台运行
 
